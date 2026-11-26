@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="لوحة تحكم الميسّر في منصة ونس.">
+  <title>لوحة الميسّر | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/organizer.js" defer></script>
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="dash-side">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+      <nav aria-label="أقسام لوحة الميسّر">
+        <a class="dash-link dash-link--active" href="#overview" data-section-link="overview" aria-current="page">نظرة عامة</a>
+        <a class="dash-link" href="#groups" data-section-link="groups">مجموعاتي</a>
+        <a class="dash-link" href="#events" data-section-link="events">فعالياتي</a>
+        <a class="dash-link" href="#create-event" data-section-link="create-event">إنشاء فعالية</a>
+      </nav>
+      <div class="dash-user">
+        <strong id="organizer-name">الميسّر</strong>
+        <span>حساب ميسّر</span>
+        <button class="button button--secondary" id="logout-button" type="button">تسجيل خروج</button>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <section class="organizer-section" id="section-overview" aria-labelledby="overview-title">
+        <header class="dash-top"><div><p class="eyebrow">ملخص نشاطك</p><h1 id="overview-title">نظرة عامة</h1></div></header>
+        <div class="stat-cards stat-cards--three">
+          <article class="stat-card"><span>عدد المجموعات</span><strong id="groups-count">0</strong></article>
+          <article class="stat-card"><span>الفعاليات المنشورة</span><strong id="published-events-count">0</strong></article>
+          <article class="stat-card"><span>الفعاليات قيد المراجعة</span><strong id="pending-events-count">0</strong></article>
+        </div>
+      </section>
+
+      <section class="organizer-section" id="section-groups" aria-labelledby="groups-title" hidden>
+        <header class="dash-top">
+          <div><p class="eyebrow">مساحات الدعم التي تقودها</p><h1 id="groups-title">مجموعاتي</h1></div>
+          <button class="button" id="show-group-form" type="button">إنشاء مجموعة جديدة</button>
+        </header>
+        <form class="form-card panel" id="group-form" hidden>
+          <h2>بيانات المجموعة الجديدة</h2>
+          <label class="field" for="group-title">اسم المجموعة<input id="group-title" name="title" type="text" required maxlength="120"></label>
+          <label class="field" for="group-topic">الموضوع<input id="group-topic" name="topic" type="text" required maxlength="120"></label>
+          <label class="field" for="group-description">الوصف<textarea id="group-description" name="description" rows="4" required></textarea></label>
+          <div class="catalog-card__actions">
+            <button class="button" type="submit">حفظ المجموعة</button>
+            <button class="button button--secondary" id="cancel-group-form" type="button">إلغاء</button>
+          </div>
+        </form>
+        <p class="form-message" id="group-message" role="status" aria-live="polite"></p>
+        <div class="panel table-card"><h2>مجموعاتك</h2><div id="groups-content" aria-live="polite"></div></div>
+      </section>
+
+      <section class="organizer-section" id="section-events" aria-labelledby="events-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">اللقاءات والأنشطة</p><h1 id="events-title">فعالياتي</h1></div></header>
+        <div class="panel table-card"><h2>الفعاليات التي أنشأتها</h2><div id="events-content" aria-live="polite"></div></div>
+      </section>
+
+      <section class="organizer-section" id="section-create-event" aria-labelledby="create-event-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">نشاط جديد</p><h1 id="create-event-title">إنشاء فعالية</h1></div></header>
+        <form class="form-card panel" id="event-form">
+          <h2>بيانات الفعالية</h2>
+          <label class="field" for="event-title">عنوان الفعالية<input id="event-title" name="title" type="text" required maxlength="120"></label>
+          <label class="field" for="event-description">الوصف<textarea id="event-description" name="description" required rows="4"></textarea></label>
+          <label class="field" for="event-date">التاريخ<input id="event-date" name="date" type="date" required></label>
+          <label class="field" for="event-time">الوقت<input id="event-time" name="time" type="time" required></label>
+          <label class="field" for="event-group">المجموعة
+            <select id="event-group" name="groupId" required><option value="">اختر المجموعة</option></select>
+          </label>
+          <label class="field" for="event-space">المساحة
+            <select id="event-space" name="spaceId" required><option value="">اختر المساحة</option></select>
+          </label>
+          <p class="form-message" id="event-message" role="status" aria-live="polite"></p>
+          <button class="button" id="create-event-button" type="submit">إنشاء الفعالية</button>
+        </form>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

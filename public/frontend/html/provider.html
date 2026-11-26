@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="لوحة إدارة حساب مقدم الخدمة في منصة ونس.">
+  <title>لوحة مقدم الخدمة | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="dash-side">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+      <nav aria-label="أقسام مقدم الخدمة">
+        <a class="dash-link dash-link--active" href="#overview" data-section-link="overview" aria-current="page">نظرة عامة</a>
+        <a class="dash-link" href="#requests" data-section-link="requests" data-owner-only hidden>طلبات الحجز</a>
+        <a class="dash-link" href="#appointments" data-section-link="appointments" id="appointments-link">مواعيدي</a>
+        <a class="dash-link" href="#availability" data-section-link="availability" data-specialist-only hidden>أوقاتي المتاحة</a>
+        <a class="dash-link" href="#spaces" data-section-link="spaces" data-owner-only hidden>مساحاتي</a>
+        <a class="dash-link" href="#profile" data-section-link="profile">ملفي الشخصي</a>
+      </nav>
+      <div class="dash-user">
+        <strong id="provider-name">مقدم الخدمة</strong>
+        <span id="provider-role">حساب مقدم خدمة</span>
+        <button class="button button--secondary" id="logout-button" type="button">تسجيل خروج</button>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <section class="provider-section" id="section-overview" aria-labelledby="overview-title">
+        <header class="dash-top"><div><p class="eyebrow">ملخص حسابك</p><h1 id="overview-title">نظرة عامة</h1></div></header>
+        <div class="stat-cards">
+          <article class="stat-card"><span id="confirmed-stat-label">إجمالي المواعيد المؤكدة</span><strong id="confirmed-count">0</strong></article>
+          <article class="stat-card" id="pending-stat-card" hidden><span>طلبات معلقة</span><strong id="pending-count">0</strong></article>
+          <article class="stat-card" id="availability-stat-card" hidden><span>المواعيد المتاحة</span><strong id="availability-count">0</strong></article>
+          <article class="stat-card"><span>إجمالي الأرباح</span><strong id="net-earnings">0</strong></article>
+        </div>
+        <p class="status-note">تُحتسب الأرباح الصافية بعد خصم عمولة المنصة البالغة 8% من الحجوزات المؤكدة.</p>
+      </section>
+
+      <section class="provider-section" id="section-requests" aria-labelledby="requests-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">بانتظار قرارك</p><h1 id="requests-title">طلبات الحجز</h1></div></header>
+        <div class="panel table-card"><h2>طلبات استئجار المساحات</h2><div id="requests-content" aria-live="polite"></div></div>
+      </section>
+
+      <section class="provider-section" id="section-appointments" aria-labelledby="appointments-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">مواعيدك</p><h1 id="appointments-title">مواعيدي</h1></div></header>
+        <div class="panel table-card"><h2>الحجوزات المؤكدة</h2><div id="appointments-content" aria-live="polite"></div></div>
+      </section>
+
+      <section class="provider-section" id="section-availability" aria-labelledby="availability-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">إدارة جدولك</p><h1 id="availability-title">أوقاتي المتاحة</h1></div></header>
+        <form class="form-card panel" id="availability-form">
+          <h2>إضافة وقت متاح</h2>
+          <label class="field" for="slot-date">التاريخ<input id="slot-date" name="date" type="date" required></label>
+          <label class="field" for="slot-time">الوقت<input id="slot-time" name="time" type="time" required></label>
+          <p class="form-message" id="availability-message" role="status" aria-live="polite"></p>
+          <button class="button" type="submit">إضافة الوقت</button>
+        </form>
+        <div class="panel table-card"><h2>الأوقات المسجلة</h2><div id="availability-content" aria-live="polite"></div></div>
+      </section>
+
+      <section class="provider-section" id="section-spaces" aria-labelledby="spaces-title" hidden>
+        <header class="dash-top">
+          <div><p class="eyebrow">إدارة مساحاتك</p><h1 id="spaces-title">مساحاتي</h1></div>
+          <button class="button" id="add-space-button" type="button">إضافة مساحة جديدة</button>
+        </header>
+        <form class="form-card panel" id="space-form" hidden>
+          <h2>بيانات المساحة الجديدة</h2>
+          <label class="field" for="space-name">اسم المساحة<input id="space-name" name="name" type="text" required></label>
+          <label class="field" for="space-capacity">السعة<input id="space-capacity" name="capacity" type="number" min="1" required></label>
+          <label class="field" for="space-price">السعر<input id="space-price" name="price" type="number" min="0" step="0.01" required></label>
+          <p class="form-message" id="space-message" role="status" aria-live="polite"></p>
+          <div class="catalog-card__actions">
+            <button class="button" type="submit">حفظ المساحة</button>
+            <button class="button button--secondary" id="cancel-space-button" type="button">إلغاء</button>
+          </div>
+        </form>
+        <div class="panel table-card"><h2>المساحات المسجلة</h2><div id="spaces-content" aria-live="polite"></div></div>
+      </section>
+
+      <section class="provider-section" id="section-profile" aria-labelledby="profile-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">بيانات الحساب</p><h1 id="profile-title">ملفي الشخصي</h1></div></header>
+        <form class="form-card panel" id="profile-form">
+          <h2>تحديث الملف الشخصي</h2>
+          <label class="field" for="profile-name">الاسم<input id="profile-name" name="name" type="text" required></label>
+          <label class="field" id="specialty-field" for="profile-specialty" hidden>التخصص<input id="profile-specialty" name="specialty" type="text" required></label>
+          <label class="field" id="price-field" for="profile-price" hidden>السعر<input id="profile-price" name="price" type="number" min="0" step="0.01" required></label>
+          <p class="form-message" id="profile-message" role="status" aria-live="polite"></p>
+          <button class="button" type="submit">حفظ التغييرات</button>
+        </form>
+      </section>
+    </main>
+  </div>
+  <script src="../js/provider.js"></script>
+</body>
+</html>

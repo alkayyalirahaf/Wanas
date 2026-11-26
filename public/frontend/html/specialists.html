@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="تعرّف على الأخصائيين المعتمدين في منصة ونس.">
+  <title>الأخصائيون | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="ونس، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+    <nav class="main-nav" aria-label="التنقل الرئيسي">
+      <a class="nav-link" href="../index.html">الرئيسية</a>
+      <a class="nav-link" href="groups.html">المجموعات</a>
+      <a class="nav-link" href="events.html">الفعاليات</a>
+      <a class="nav-link nav-link--active" href="specialists.html" aria-current="page">الأخصائيون</a>
+      <a class="nav-link" href="spaces.html">المساحات</a>
+      <a class="nav-link" href="ai-assistant.html">المساعد الذكي</a>
+    </nav>
+    <div class="header-actions">
+      <a class="nav-link" href="#" aria-label="الإشعارات" title="الإشعارات">🔔</a>
+      <a class="nav-link" id="header-login" href="login.html">تسجيل الدخول</a>
+      <a class="button" id="header-register" href="register.html">إنشاء حساب</a>
+      <div id="header-user" hidden>
+        <a class="nav-link" id="header-profile" href="#"></a>
+        <button class="button button--secondary" id="header-logout" type="button">تسجيل خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page">
+    <header>
+      <p class="eyebrow">دعم متخصص في مساحة آمنة</p>
+      <h1>الأخصائيون</h1>
+      <p class="lede">تعرّف على الأخصائيين النشطين واختر من يناسب احتياجاتك.</p>
+    </header>
+
+    <div class="toolbar">
+      <label class="field" for="specialist-search">ابحث بالاسم أو التخصص
+        <input id="specialist-search" type="search" placeholder="مثال: دعم نفسي، علاج أسري" autocomplete="off">
+      </label>
+    </div>
+    <p id="results-count" class="results-count" aria-live="polite"></p>
+    <section id="specialists-list" class="card-grid--two" aria-label="قائمة الأخصائيين"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">ونس</span><span>ونس</span></a>
+      <p>مساحة آمنة للتواصل والدعم، لأنك تستحق أن تجد من يسمعك ويرافقك.</p>
+    </div>
+    <div><strong>استكشف</strong><a href="groups.html">المجموعات</a><a href="events.html">الفعاليات</a><a href="specialists.html">الأخصائيون</a></div>
+    <div><strong>حسابك</strong><a href="login.html">تسجيل الدخول</a><a href="register.html">إنشاء حساب</a></div>
+    <div><strong>ونس</strong><a href="../index.html#how-it-works">كيف تبدأ</a><a href="mailto:hello@wanas.example">تواصل معنا</a></div>
+    <p class="footer-bottom">© 2026 ونس. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <script src="../js/specialists.js"></script>
+  <script src="../js/public-navbar.js"></script>
+</body>
+</html>

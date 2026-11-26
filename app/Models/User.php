@@ -7,30 +7,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $table = 'users';
 
 
-    protected $fillable = ['name', 'email', 'phoneNumber', 'passwordHash', 'role', 'status', 'profileImageUrl', 'bio'];
-    protected $hidden = ['passwordHash'];
+    protected $fillable = ['name', 'email', 'phoneNumber', 'password', 'role', 'status', 'profileImageUrl', 'bio'];
+    protected $hidden = ['password', 'remember_token',
+];
 
     protected function casts(): array
     {
-        return ['passwordHash' => 'hashed'];
+        return ['password' => 'hashed' , 'email_verified_at' => 'datetime',];
     }
 
-    public function getAuthPasswordName(): string
-    {
-        return 'passwordHash';
-    }
-    public function getAuthPassword(): string
-    {
-        return $this->passwordHash;
-    }
 
     public function verificationDocuments()
     {

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="أكمل بياناتك وأرسل مستندات التحقق إلى إدارة ونس.">
+  <title>إكمال الملف الشخصي | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .upload-field { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; font-weight: bold; }
+    .upload-dropzone {
+      display: grid;
+      place-items: center;
+      gap: 0.3rem;
+      min-height: 100px;
+      padding: 1rem;
+      border: 2px dashed #9cb6aa;
+      border-radius: 14px;
+      background: #f7faf7;
+      color: var(--primary);
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 150ms ease, background 150ms ease;
+    }
+    .upload-dropzone:hover, .upload-dropzone:focus-within { border-color: var(--accent); background: #eef5f0; }
+    .upload-dropzone input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    .upload-dropzone__hint { color: var(--muted); font-size: 0.75rem; font-weight: normal; }
+    .upload-file-name { max-width: 100%; overflow-wrap: anywhere; color: var(--dark); font-size: 0.8rem; font-weight: normal; }
+    .commission-note { padding: 0.9rem; border-radius: 12px; background: #f3f6f2; color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
+    @media (max-width: 900px) { .auth-form { padding: 1.5rem; } }
+  </style>
+  <script type="module" src="../js/complete-profile.js"></script>
+</head>
+<body>
+  <main class="auth-page">
+    <aside class="auth-side">
+      <a class="brand" href="../index.html" aria-label="ونس، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+      <div>
+        <p class="eyebrow">خطوة أخيرة قبل المراجعة</p>
+        <h1>ساعدنا على توثيق حسابك</h1>
+        <p>نراجع بيانات مقدمي الخدمات لحماية مجتمع ونس وتقديم تجربة موثوقة للجميع.</p>
+      </div>
+      <blockquote>«نبني مساحة آمنة تبدأ بالثقة.»<cite>فريق ونس</cite></blockquote>
+    </aside>
+
+    <section class="auth-main" aria-labelledby="profile-title">
+      <form class="auth-form" id="complete-profile-form" novalidate>
+        <p class="eyebrow">توثيق الحساب</p>
+        <h2 id="profile-title">إكمال الملف الشخصي</h2>
+        <p>أدخل بياناتك وارفع المستندات المطلوبة لإرسالها إلى الإدارة للمراجعة.</p>
+
+        <div id="role-fields"></div>
+
+        <label class="upload-field">الهوية الوطنية / جواز السفر
+          <span class="upload-dropzone">
+            <span>اختر ملف الهوية</span>
+            <span class="upload-dropzone__hint">صورة أو ملف PDF</span>
+            <span class="upload-file-name" data-file-name>لم يتم اختيار ملف</span>
+            <input type="file" name="identityDocument" accept="image/*,.pdf" required aria-label="الهوية الوطنية أو جواز السفر">
+          </span>
+        </label>
+
+        <p class="commission-note">تُطبق عمولة المنصة على الحجوزات المكتملة وفق الاتفاقية.</p>
+        <label class="check-row" for="commission-agreement">
+          <input id="commission-agreement" name="commissionAgreement" type="checkbox" required>
+          <span>أوافق على اتفاقية المنصة وخصم عمولة بنسبة 8% من كل حجز</span>
+        </label>
+
+        <p class="form-message" id="profile-message" role="status" aria-live="polite"></p>
+        <button class="button" type="submit">إرسال الطلب للمراجعة</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

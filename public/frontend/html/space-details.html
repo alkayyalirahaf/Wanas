@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="تفاصيل مساحة وحجزها عبر منصة ونس.">
+  <title>تفاصيل المساحة | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="ونس، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+    <nav class="main-nav" aria-label="التنقل الرئيسي">
+      <a class="nav-link" href="../index.html">الرئيسية</a>
+      <a class="nav-link" href="groups.html">المجموعات</a>
+      <a class="nav-link" href="events.html">الفعاليات</a>
+      <a class="nav-link" href="specialists.html">الأخصائيون</a>
+      <a class="nav-link nav-link--active" href="spaces.html" aria-current="page">المساحات</a>
+      <a class="nav-link" href="ai-assistant.html">المساعد الذكي</a>
+    </nav>
+    <div class="header-actions">
+      <a class="nav-link" href="#" aria-label="الإشعارات" title="الإشعارات">🔔</a>
+      <a class="nav-link" id="header-login" href="login.html">تسجيل الدخول</a>
+      <a class="button" id="header-register" href="register.html">إنشاء حساب</a>
+      <div id="header-user" hidden>
+        <a class="nav-link" id="header-profile" href="#"></a>
+        <button class="button button--secondary" id="header-logout" type="button">تسجيل خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page">
+    <p class="breadcrumb"><a href="spaces.html">المساحات</a> / <span>تفاصيل المساحة</span></p>
+    <p class="form-message" id="page-message" role="status" aria-live="polite"></p>
+    <section class="group-hero" id="space-hero" aria-live="polite"></section>
+
+    <div class="detail-layout" id="space-detail-layout" hidden>
+      <article class="content-block">
+        <p class="eyebrow">عن المساحة</p>
+        <p id="space-description"></p>
+        <div class="inline-meta"><span id="space-city"></span><span id="space-capacity"></span></div>
+      </article>
+      <aside class="card join-card">
+        <h3>احجز هذه المساحة</h3>
+        <p id="space-price-note" class="cost-note"></p>
+        <form id="space-booking-form" novalidate>
+          <label class="field" for="booking-date">التاريخ
+            <input id="booking-date" name="date" type="date" required>
+          </label>
+          <label class="field" for="booking-time">الوقت
+            <input id="booking-time" name="time" type="time" required>
+          </label>
+          <p class="form-message" id="booking-message" role="status" aria-live="polite"></p>
+          <button class="button" type="submit">احجز الآن</button>
+        </form>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">ونس</span><span>ونس</span></a>
+      <p>مساحة آمنة للتواصل والدعم، لأنك تستحق أن تجد من يسمعك ويرافقك.</p>
+    </div>
+    <div><strong>استكشف</strong><a href="groups.html">المجموعات</a><a href="events.html">الفعاليات</a><a href="specialists.html">الأخصائيون</a><a href="spaces.html">المساحات</a></div>
+    <div><strong>حسابك</strong><a href="login.html">تسجيل الدخول</a><a href="register.html">إنشاء حساب</a></div>
+    <div><strong>ونس</strong><a href="../index.html#how-it-works">كيف تبدأ</a><a href="mailto:hello@wanas.example">تواصل معنا</a></div>
+    <p class="footer-bottom">© 2026 ونس. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <div class="modal" id="payment-modal" role="dialog" aria-modal="true" aria-labelledby="payment-title" hidden>
+    <div class="card modal-box">
+      <div class="section-heading">
+        <div><p class="eyebrow">دفع تجريبي</p><h2 id="payment-title">تأكيد حجز المساحة</h2></div>
+        <button class="button button--quiet" id="close-payment-modal" type="button" aria-label="إغلاق نافذة الدفع">إغلاق</button>
+      </div>
+      <div class="panel" id="booking-summary" aria-live="polite"></div>
+      <form class="form-card" id="payment-form">
+        <label class="field" for="card-number">رقم البطاقة
+          <input id="card-number" name="cardNumber" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456">
+        </label>
+        <div class="card-grid--two">
+          <label class="field" for="card-expiry">تاريخ الانتهاء
+            <input id="card-expiry" name="expiry" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY">
+          </label>
+          <label class="field" for="card-cvv">رمز الأمان
+            <input id="card-cvv" name="cvv" type="password" inputmode="numeric" autocomplete="cc-csc" placeholder="CVV">
+          </label>
+        </div>
+        <p class="form-message" id="payment-message" role="status" aria-live="polite"></p>
+        <button class="button" id="pay-button" type="submit">ادفع الآن</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/space-details.js"></script>
+  <script src="../js/public-navbar.js"></script>
+</body>
+</html>

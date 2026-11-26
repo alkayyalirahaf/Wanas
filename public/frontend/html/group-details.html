@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="تفاصيل مجموعة دعم في منصة ونس.">
+  <title>تفاصيل المجموعة | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="ونس، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+    <nav class="main-nav" aria-label="التنقل الرئيسي">
+      <a class="nav-link" href="../index.html">الرئيسية</a>
+      <a class="nav-link nav-link--active" href="groups.html">المجموعات</a>
+      <a class="nav-link" href="events.html">الفعاليات</a>
+      <a class="nav-link" href="specialists.html">الأخصائيون</a>
+      <a class="nav-link" href="spaces.html">المساحات</a>
+      <a class="nav-link" href="ai-assistant.html">المساعد الذكي</a>
+    </nav>
+    <div class="header-actions">
+      <a class="nav-link" href="#" aria-label="الإشعارات" title="الإشعارات">🔔</a>
+      <a class="nav-link" id="header-login" href="login.html">تسجيل الدخول</a>
+      <a class="button" id="header-register" href="register.html">إنشاء حساب</a>
+      <div id="header-user" hidden>
+        <a class="nav-link" id="header-profile" href="#"></a>
+        <button class="button button--secondary" id="header-logout" type="button">تسجيل خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page">
+    <p class="breadcrumb"><a href="groups.html">المجموعات</a> / <span>تفاصيل المجموعة</span></p>
+    <p class="form-message" id="group-message" role="status" aria-live="polite"></p>
+
+    <section class="group-hero" id="group-hero" aria-live="polite"></section>
+
+    <div class="detail-layout" id="group-detail-layout" hidden>
+      <article class="content-block">
+        <p class="eyebrow">عن المجموعة</p>
+        <p id="group-description"></p>
+        <div class="inline-meta">
+          <span id="group-topic"></span>
+          <span id="group-city"></span>
+        </div>
+      </article>
+
+      <aside class="card join-card">
+        <h3>انضم إلى مساحة داعمة</h3>
+        <p id="group-member-count"></p>
+        <div id="join-action"></div>
+      </aside>
+    </div>
+
+    <section class="section" id="group-events-section" aria-labelledby="group-events-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">لقاءات ومناسبات</p><h2 id="group-events-title">فعاليات المجموعة</h2></div>
+      </div>
+      <div class="card-grid--three" id="group-events" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">ونس</span><span>ونس</span></a>
+      <p>مساحة آمنة للتواصل والدعم، لأنك تستحق أن تجد من يسمعك ويرافقك.</p>
+    </div>
+    <div><strong>استكشف</strong><a href="groups.html">المجموعات</a><a href="events.html">الفعاليات</a><a href="specialists.html">الأخصائيون</a></div>
+    <div><strong>حسابك</strong><a href="login.html">تسجيل الدخول</a><a href="register.html">إنشاء حساب</a></div>
+    <div><strong>ونس</strong><a href="../index.html#how-it-works">كيف تبدأ</a><a href="mailto:hello@wanas.example">تواصل معنا</a></div>
+    <p class="footer-bottom">© 2026 ونس. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <script src="../js/group-details.js"></script>
+  <script src="../js/public-navbar.js"></script>
+</body>
+</html>

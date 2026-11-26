@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="بوابة دخول إدارة ونس.">
+  <title>دخول الإدارة | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .auth-side--admin { background-color: #183b36; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+<script type="module" src="../js/admin-login.js"></script>
+
+</head>
+<body>
+  <main class="auth-page">
+    <aside class="auth-side auth-side--admin">
+      <a class="brand" href="../index.html" aria-label="ونس"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+      <div>
+        <p class="eyebrow">بوابة فريق العمل</p>
+        <h1>إدارة منصة ونس</h1>
+        <p>مساحة مخصصة لإدارة المنصة ومراجعة طلبات مقدمي الخدمات.</p>
+      </div>
+      <blockquote>«الثقة والرعاية أساس مجتمعنا.»<cite>فريق ونس</cite></blockquote>
+    </aside>
+
+    <section class="auth-main" aria-labelledby="admin-login-title">
+      <form class="auth-form" id="admin-login-form" novalidate>
+        <p class="eyebrow">دخول آمن</p>
+        <h2 id="admin-login-title">دخول الإدارة</h2>
+        <p>هذه الصفحة مخصصة لمديري النظام فقط.</p>
+        <label class="field" for="admin-email">البريد الإلكتروني
+          <input id="admin-email" name="email" type="email" autocomplete="username" required>
+        </label>
+        <label class="field" for="admin-password">كلمة المرور
+          <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <p class="form-message" id="admin-login-message" role="alert" aria-live="polite"></p>
+        <button class="button" type="submit">دخول</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

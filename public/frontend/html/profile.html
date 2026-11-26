@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="إدارة ملفك الشخصي وطلبات التيسير في منصة ونس.">
+  <title>ملفي الشخصي | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="ونس، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+    <nav class="main-nav" aria-label="التنقل الرئيسي">
+      <a class="nav-link" href="../index.html">الرئيسية</a>
+      <a class="nav-link" href="groups.html">المجموعات</a>
+      <a class="nav-link" href="events.html">الفعاليات</a>
+      <a class="nav-link" href="specialists.html">الأخصائيون</a>
+      <a class="nav-link" href="spaces.html">المساحات</a>
+      <a class="nav-link" href="ai-assistant.html">المساعد الذكي</a>
+    </nav>
+    <div class="header-actions">
+      <a class="nav-link" href="#" aria-label="الإشعارات" title="الإشعارات">🔔</a>
+      <a class="nav-link" id="header-login" href="login.html">تسجيل الدخول</a>
+      <a class="button" id="header-register" href="register.html">إنشاء حساب</a>
+      <div id="header-user" hidden>
+        <a class="nav-link" id="header-profile" href="profile.html"></a>
+        <button class="button button--secondary" id="header-logout" type="button">تسجيل خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page">
+    <header>
+      <p class="eyebrow">حسابك في ونس</p>
+      <h1>ملفي الشخصي</h1>
+      <p class="lede">حدّث معلوماتك واختر الخطوة التالية في رحلتك مع ونس.</p>
+    </header>
+
+    <div class="detail-layout">
+      <section class="content-block" aria-labelledby="profile-info-title">
+        <div class="profile-head">
+          <div class="person-avatar" id="profile-avatar" aria-hidden="true">و</div>
+          <div>
+            <h2 id="profile-display-name">المستخدم</h2>
+            <p id="profile-role"></p>
+          </div>
+        </div>
+        <form id="profile-form" class="form-card">
+          <h2 id="profile-info-title">تعديل البيانات</h2>
+          <label class="field" for="profile-name">الاسم<input id="profile-name" name="name" type="text" required minlength="2"></label>
+          <label class="field" for="profile-email">البريد الإلكتروني<input id="profile-email" name="email" type="email" readonly></label>
+          <label class="field" for="profile-bio">نبذة عني<textarea id="profile-bio" name="bio" placeholder="اكتب نبذة قصيرة عنك"></textarea></label>
+          <p class="form-message" id="profile-message" role="status" aria-live="polite"></p>
+          <button class="button" type="submit">حفظ التعديلات</button>
+        </form>
+      </section>
+
+      <section class="card join-card" id="facilitator-section" aria-labelledby="facilitator-title" hidden>
+        <h2 id="facilitator-title">هل ترغب في قيادة مجموعة دعم؟</h2>
+        <p>يساعد الميسّر على تهيئة مساحة آمنة للحوار، وتشجيع الأعضاء على المشاركة باحترام، وتنظيم لقاءات المجموعة.</p>
+        <p class="form-message" id="facilitator-message" role="status" aria-live="polite"></p>
+        <button class="button" id="apply-facilitator-button" type="button">تقديم طلب لميسر</button>
+      </section>
+
+      <section class="card join-card" id="facilitator-dashboard-link" hidden>
+        <h2>مساحة الميسّر</h2>
+        <p>يمكنك متابعة مجموعاتك وتنظيمها من لوحة تحكم الميسّر.</p>
+        <a class="button" href="organizer.html">الذهاب للوحة تحكم الميسر</a>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">ونس</span><span>ونس</span></a>
+      <p>مساحة آمنة للتواصل والدعم، لأنك تستحق أن تجد من يسمعك ويرافقك.</p>
+    </div>
+    <div><strong>استكشف</strong><a href="groups.html">المجموعات</a><a href="events.html">الفعاليات</a><a href="specialists.html">الأخصائيون</a><a href="spaces.html">المساحات</a></div>
+    <div><strong>حسابك</strong><a href="profile.html">ملفي الشخصي</a><a href="login.html">تسجيل الدخول</a></div>
+    <div><strong>ونس</strong><a href="../index.html#how-it-works">كيف تبدأ</a><a href="mailto:hello@wanas.example">تواصل معنا</a></div>
+    <p class="footer-bottom">© 2026 ونس. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <script src="../js/profile.js"></script>
+  <script src="../js/public-navbar.js"></script>
+</body>
+</html>

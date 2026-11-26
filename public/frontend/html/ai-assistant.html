@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="أجب عن أسئلة قصيرة واحصل على اقتراحات دعم تناسبك من ونس.">
+  <title>المساعد الذكي | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .assistant-form { max-width: 680px; margin: 2rem auto; }
+    .assistant-results { display: grid; gap: 1.2rem; }
+    .assistant-recommendations { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .assistant-loading { display: flex; align-items: center; justify-content: center; gap: 0.8rem; padding: 2rem; color: var(--primary); font-weight: bold; }
+    .assistant-spinner { width: 1.4rem; height: 1.4rem; border: 3px solid var(--soft); border-top-color: var(--primary); border-radius: 50%; animation: assistant-spin 800ms linear infinite; }
+    @keyframes assistant-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .assistant-spinner { animation-duration: 2s; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="ونس، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+    <nav class="main-nav" aria-label="التنقل الرئيسي">
+      <a class="nav-link" href="../index.html">الرئيسية</a>
+      <a class="nav-link" href="groups.html">المجموعات</a>
+      <a class="nav-link" href="events.html">الفعاليات</a>
+      <a class="nav-link" href="specialists.html">الأخصائيون</a>
+      <a class="nav-link" href="spaces.html">المساحات</a>
+      <a class="nav-link nav-link--active" href="ai-assistant.html" aria-current="page">المساعد الذكي</a>
+    </nav>
+    <div class="header-actions">
+      <a class="nav-link" href="#" aria-label="الإشعارات" title="الإشعارات">🔔</a>
+      <a class="nav-link" id="header-login" href="login.html">تسجيل الدخول</a>
+      <a class="button" id="header-register" href="register.html">إنشاء حساب</a>
+      <div id="header-user" hidden>
+        <a class="nav-link" id="header-profile" href="#"></a>
+        <button class="button button--secondary" id="header-logout" type="button">تسجيل خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page">
+    <header>
+      <p class="eyebrow">اقتراحات أولية تناسب احتياجك</p>
+      <h1>المساعد الذكي</h1>
+      <p class="lede">أخبرنا قليلاً عما تمر به، وسنقترح عليك خطة عمل تناسبك.</p>
+    </header>
+
+    <form class="card form-card assistant-form" id="assistant-form">
+      <label class="field" for="feeling">بماذا تشعر؟
+        <select id="feeling" name="feeling" required>
+          <option value="" selected disabled>اختر ما يناسبك</option>
+          <option value="قلق وتوتر">قلق وتوتر</option>
+          <option value="حزن">حزن</option>
+          <option value="ضغط نفسي">ضغط نفسي</option>
+          <option value="أزمات علاقات">أزمات علاقات</option>
+        </select>
+      </label>
+      <label class="field" for="city">أين أنت؟
+        <select id="city" name="city" required>
+          <option value="" selected disabled>اختر المدينة</option>
+          <option value="عمان">عمان</option>
+          <option value="إربد">إربد</option>
+          <option value="الزرقاء">الزرقاء</option>
+          <option value="أي مدينة">أي مدينة</option>
+        </select>
+      </label>
+      <label class="field" for="help-type">ما الذي سيساعدك أكثر؟
+        <select id="help-type" name="helpType" required>
+          <option value="" selected disabled>اختر نوع الدعم</option>
+          <option value="التحدث مع مختص">التحدث مع مختص</option>
+          <option value="الانضمام لمجموعة دعم">الانضمام لمجموعة دعم</option>
+          <option value="حضور فعالية">حضور فعالية</option>
+        </select>
+      </label>
+      <p class="form-message" id="assistant-message" role="status" aria-live="polite"></p>
+      <button class="button" type="submit">أنشئ خطتي</button>
+    </form>
+
+    <div class="assistant-loading" id="assistant-loading" role="status" aria-live="polite" hidden>
+      <span class="assistant-spinner" aria-hidden="true"></span>
+      <span>جاري تحليل إجاباتك...</span>
+    </div>
+
+    <section class="assistant-results" id="assistant-results" aria-labelledby="results-title" hidden>
+      <article class="card card-body">
+        <p class="eyebrow">خطتك المقترحة</p>
+        <h2 id="results-title">خطوة مناسبة لك</h2>
+        <p id="plan-summary"></p>
+        <ol class="plan-steps" id="plan-steps"></ol>
+      </article>
+      <div>
+        <div class="section-heading"><div><p class="eyebrow">خيارات قريبة منك</p><h2>توصيات ونس</h2></div></div>
+        <div class="assistant-recommendations" id="recommendations"></div>
+      </div>
+      <button class="button button--secondary" id="restart-assistant" type="button">إنشاء خطة جديدة</button>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">ونس</span><span>ونس</span></a>
+      <p>مساحة آمنة للتواصل والدعم، لأنك تستحق أن تجد من يسمعك ويرافقك.</p>
+    </div>
+    <div><strong>استكشف</strong><a href="groups.html">المجموعات</a><a href="events.html">الفعاليات</a><a href="specialists.html">الأخصائيون</a><a href="spaces.html">المساحات</a></div>
+    <div><strong>حسابك</strong><a href="login.html">تسجيل الدخول</a><a href="register.html">إنشاء حساب</a></div>
+    <div><strong>ونس</strong><a href="../index.html#how-it-works">كيف تبدأ</a><a href="mailto:hello@wanas.example">تواصل معنا</a></div>
+    <p class="footer-bottom">© 2026 ونس. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <script src="../js/ai-assistant.js"></script>
+  <script src="../js/public-navbar.js"></script>
+</body>
+</html>

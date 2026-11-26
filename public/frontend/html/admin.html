@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="لوحة إدارة منصة ونس.">
+  <title>لوحة الإدارة | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script type="module" src="../js/admin.js"></script>
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="dash-side">
+      <a class="brand" href="admin.html"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+      <nav aria-label="أقسام الإدارة">
+        <a class="dash-link dash-link--active" href="#overview" data-section-link="overview" aria-current="page">نظرة عامة</a>
+        <a class="dash-link" href="#users" data-section-link="users">طلبات التوثيق</a>
+        <a class="dash-link" href="#facilitators" data-section-link="facilitators">طلبات الميسرين</a>
+        <a class="dash-link" href="#all-users" data-section-link="all-users">جميع المستخدمين</a>
+        <a class="dash-link" href="#events" data-section-link="events">إدارة الفعاليات</a>
+        <a class="dash-link" href="#reports" data-section-link="reports">البلاغات والشكاوى</a>
+      </nav>
+      <div class="dash-user">
+        <strong id="admin-name">المدير</strong>
+        <span>إدارة المنصة</span>
+        <button class="button button--secondary" id="logout-button" type="button">تسجيل خروج</button>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <section class="admin-section" id="section-overview" aria-labelledby="overview-title">
+        <header class="dash-top"><div><p class="eyebrow">ملخص المنصة</p><h1 id="overview-title">نظرة عامة</h1></div></header>
+        <div class="stat-cards">
+          <article class="stat-card"><span>إجمالي المستخدمين</span><strong id="total-users">0</strong></article>
+          <article class="stat-card"><span>الفعاليات المنشورة</span><strong id="published-events">0</strong></article>
+          <article class="stat-card"><span>إجمالي الحجوزات</span><strong id="total-bookings">0</strong></article>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-users" aria-labelledby="users-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">مراجعة الحسابات</p><h1 id="users-title">طلبات التوثيق المعلقة</h1></div></header>
+        <div class="panel table-card">
+          <h2>الأخصائيون وملاك المساحات</h2>
+          <div id="pending-content" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-facilitators" aria-labelledby="facilitators-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">مراجعة الطلبات</p><h1 id="facilitators-title">طلبات الميسرين</h1></div></header>
+        <div class="panel table-card">
+          <h2>طلبات الانضمام كميسّر</h2>
+          <div id="facilitator-applications-content" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-events" aria-labelledby="events-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">مراجعة المحتوى</p><h1 id="events-title">إدارة الفعاليات</h1></div></header>
+        <div class="panel table-card">
+          <h2>جميع الفعاليات</h2>
+          <div id="events-content" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-all-users" aria-labelledby="all-users-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">إدارة الحسابات</p><h1 id="all-users-title">جميع المستخدمين</h1></div></header>
+        <div class="panel table-card">
+          <h2>حسابات المنصة</h2>
+          <div id="all-users-content" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-reports" aria-labelledby="reports-title" hidden>
+        <header class="dash-top"><div><p class="eyebrow">مراجعة البلاغات</p><h1 id="reports-title">البلاغات والشكاوى</h1></div></header>
+        <div class="panel table-card">
+          <h2>البلاغات الواردة</h2>
+          <div id="reports-content" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

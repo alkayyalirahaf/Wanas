@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="أنشئ حسابك في منصة ونس للدعم النفسي والمجتمعي.">
+  <title>إنشاء حساب | ونس</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <main class="auth-page">
+    <aside class="auth-side">
+      <a class="brand" href="../index.html" aria-label="ونس، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ونس</span></a>
+      <div>
+        <p class="eyebrow">مساحة آمنة للجميع</p>
+        <h1>خطوة صغيرة نحو دعم أقرب</h1>
+        <p>أنشئ حسابك لتجد مجتمعاً داعماً أو لتقدّم خبرتك لمن يحتاجها.</p>
+      </div>
+      <blockquote>«ليس عليك أن تحمل كل شيء وحدك.»<cite>فريق ونس</cite></blockquote>
+    </aside>
+
+    <section class="auth-main" aria-labelledby="register-title">
+      <form class="auth-form" id="register-form" >
+        <p class="eyebrow">أهلاً بك في ونس</p>
+        <h2 id="register-title">إنشاء حساب</h2>
+        <p>املأ البيانات التالية للبدء.</p>
+        <label class="field" for="name">الاسم الكامل<input id="name" name="name" type="text" autocomplete="name" required minlength="2"></label>
+        <label class="field" for="email">البريد الإلكتروني<input id="email" name="email" type="email" autocomplete="email" required></label>
+        <label class="field" for="password">كلمة المرور<input id="password" name="password" type="password" autocomplete="new-password" required minlength="8" aria-describedby="password-hint"><span id="password-hint">ثمانية أحرف على الأقل.</span></label>
+        <label class="field" for="role">نوع الحساب
+          <select id="role" name="role" required>
+            <option value="member">عضو / مستفيد</option>
+            <option value="specialist">أخصائي</option>
+            <option value="owner">مالك مساحة</option>
+          </select>
+          <p class="form-message" id="role-hint" style="display: none; color: #d63031;">سيُطلب منك رفع الوثائق في الخطوة التالية لإكمال التسجيل.</p>
+        </label>
+        <p class="form-message" id="register-message" role="status" aria-live="polite"></p>
+        <button class="button" type="submit">إنشاء الحساب</button>
+        <p class="auth-switch">لديك حساب بالفعل؟ <a href="login.html">تسجيل الدخول</a></p>
+      </form>
+    </section>
+  </main>
+    <script type="module" src="../js/auth.js"></script>
+
+</body>
+</html>
