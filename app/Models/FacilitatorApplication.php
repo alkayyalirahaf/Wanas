@@ -1,8 +1,10 @@
 <?php
 namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 class FacilitatorApplication extends Model
 {
+    use HasFactory;
     protected $table = 'facilitator_applications';
     protected $guarded = ['id'];
    

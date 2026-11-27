@@ -1,386 +1,395 @@
-// Verify the administrator session before initializing any dashboard content.
-let currentUser = null;
-try {
-  currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
-} catch {
-  currentUser = null;
+
+import { api } from './admin/api.js';
+import { loadFacilitatorApplications } from './admin/facilitators.js';
+import { renderPendingUsers } from './admin/specialists.js';
+
+// HTML elements
+const adminName = document.querySelector('#admin-name');
+const logoutButton = document.querySelector('#logout-button');
+
+const facilitatorApplicationsContent = document.querySelector(
+  '#facilitator-applications-content'
+);
+const eventsContent = document.querySelector('#events-content');
+const allUsersContent = document.querySelector('#all-users-content');
+const groupsContent = document.querySelector('#groups-content');
+const reportsContent = document.querySelector('#reports-content');
+
+const navLinks = document.querySelectorAll('[data-section-link]');
+const sections = document.querySelectorAll('.admin-section');
+
+// Dashboard statistics elements
+const statisticElements = {
+  totalUsers: document.querySelector('#total-users'),
+  activeSpecialists: document.querySelector('#active-specialists'),
+  pendingSpecialists: document.querySelector('#pending-specialists'),
+  pendingFacilitators: document.querySelector('#pending-facilitators'),
+  openReports: document.querySelector('#open-reports'),
+  totalGroups: document.querySelector('#total-groups'),
+  totalEvents: document.querySelector('#total-events'),
+};
+
+// Chart elements
+const usersChartCanvas = document.querySelector('#users-chart');
+const eventsChartCanvas = document.querySelector('#events-chart');
+
+let usersChart = null;
+let eventsChart = null;
+
+// Display a message inside an HTML container
+function showMessage(container, message) {
+  if (!container) return;
+
+  container.innerHTML = `
+    <p class="status-note"
+       style="padding: 2rem 1rem; text-align: center;">
+      ${message}
+    </p>
+  `;
 }
 
-if (!currentUser || currentUser.role !== 'admin') {
-  window.location.replace('admin-login.html');
-} else {
-  const adminName = document.querySelector('#admin-name');
-  const logoutButton = document.querySelector('#logout-button');
-  const pendingContent = document.querySelector('#pending-content');
-  const facilitatorApplicationsContent = document.querySelector('#facilitator-applications-content');
-  const eventsContent = document.querySelector('#events-content');
-  const allUsersContent = document.querySelector('#all-users-content');
-  const reportsContent = document.querySelector('#reports-content');
-  const navLinks = document.querySelectorAll('[data-section-link]');
-  const sections = document.querySelectorAll('.admin-section');
+// Update a dashboard statistic
+function setStatistic(element, value) {
+  if (element) {
+    element.textContent = value ?? 0;
+  }
+}
 
-  adminName.textContent = currentUser.name || 'المدير';
+// Load administrator information
+async function loadAdminInfo() {
+  const response = await api.get('/me');
+  const admin = response.data.admin;
 
-  function readArray(key) {
-    try {
-      const value = JSON.parse(localStorage.getItem(key) || '[]');
-      return Array.isArray(value) ? value : [];
-    } catch {
-      return [];
-    }
+  if (!admin || admin.role !== 'admin') {
+    throw new Error('Unauthorized administrator');
   }
 
-  function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>"']/g, (character) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-    })[character]);
+  adminName.textContent = admin.name || 'المدير';
+}
+
+// Translate user roles into Arabic
+function getRoleLabel(role) {
+  const labels = {
+    member: 'الأعضاء',
+    specialist: 'الأخصائيون',
+    facilitator: 'الميسّرون',
+    admin: 'الإدارة',
+  };
+
+  return labels[role] || role;
+}
+
+// Translate event statuses into Arabic
+function getEventStatusLabel(status) {
+  const labels = {
+    Published: 'منشورة',
+    Draft: 'مسودة',
+    Canceled: 'ملغاة',
+    Cancelled: 'ملغاة',
+  };
+
+  return labels[status] || status || 'غير محددة';
+}
+
+// Create or update users distribution chart
+function renderUsersChart(usersData) {
+  if (!usersChartCanvas || typeof Chart === 'undefined') {
+    console.error('Users chart canvas or Chart.js was not found.');
+    return;
   }
 
-  function formatDate(value) {
-    if (!value) return 'غير محدد';
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? escapeHtml(value) : date.toLocaleDateString('ar-EG');
+  if (usersChart) {
+    usersChart.destroy();
   }
 
-  function formatSubmissionDate(value) {
-    if (!value) return 'غير محدد';
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? 'غير محدد' : date.toLocaleDateString('ar-EG');
+  const labels = usersData.map((item) => getRoleLabel(item.role));
+  const values = usersData.map((item) => item.count);
+
+  usersChart = new Chart(usersChartCanvas, {
+    type: 'doughnut',
+
+    data: {
+      labels,
+      datasets: [{
+        label: 'عدد المستخدمين',
+        data: values,
+        backgroundColor: [
+          '#6C8EBF',
+          '#8CBF9F',
+          '#E6B566',
+          '#B49AD6',
+        ],
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
+      }],
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            usePointStyle: true,
+          },
+        },
+      },
+    },
+  });
+}
+
+// Create or update events status chart
+function renderEventsChart(eventsData) {
+  if (!eventsChartCanvas || typeof Chart === 'undefined') {
+    console.error('Events chart canvas or Chart.js was not found.');
+    return;
   }
 
-  function renderOverview() {
-    const users = readArray('users');
-    const events = readArray('events');
-    const bookings = readArray('bookings');
-    const publishedEvents = events.filter((event) =>
-      event.published === true || ['Published', 'منشورة'].includes(event.status)
-    ).length;
-
-    document.querySelector('#total-users').textContent = users.length.toLocaleString('ar-EG');
-    document.querySelector('#published-events').textContent = publishedEvents.toLocaleString('ar-EG');
-    document.querySelector('#total-bookings').textContent = bookings.length.toLocaleString('ar-EG');
+  if (eventsChart) {
+    eventsChart.destroy();
   }
 
-  function renderPendingUsers() {
-    const pendingUsers = readArray('users').filter((user) =>
-      ['specialist', 'owner'].includes(user.role) && user.status === 'Pending'
+  const labels = eventsData.map((item) =>
+    getEventStatusLabel(item.status)
+  );
+
+  const values = eventsData.map((item) => item.count);
+
+  eventsChart = new Chart(eventsChartCanvas, {
+    type: 'bar',
+
+    data: {
+      labels,
+
+      datasets: [{
+        label: 'عدد الفعاليات',
+        data: values,
+        backgroundColor: '#8CBF9F',
+        borderRadius: 6,
+        maxBarThickness: 55,
+      }],
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0,
+          },
+        },
+      },
+    },
+  });
+}
+
+// Load dashboard statistics and charts
+async function loadDashboardStats() {
+  Object.values(statisticElements).forEach((element) => {
+    setStatistic(element, '...');
+  });
+
+  try {
+    const response = await api.get('/stats');
+
+    // The response contains stats and charts inside data
+    const { stats, charts } = response.data.data;
+
+    // Update statistic cards
+    setStatistic(statisticElements.totalUsers, stats.total_users);
+
+    setStatistic(
+      statisticElements.activeSpecialists,
+      stats.active_specialists
     );
 
-    if (pendingUsers.length === 0) {
-      pendingContent.innerHTML = '<p class="status-note" style="padding: 2rem 1rem; text-align: center;">لا يوجد طلبات توثيق معلقة حالياً.</p>';
-      return;
-    }
+    setStatistic(
+      statisticElements.pendingSpecialists,
+      stats.pending_specialists
+    );
 
-    const rows = pendingUsers.map((user) => `
-      <tr>
-        <td>${escapeHtml(user.name || '—')}</td>
-        <td>${escapeHtml(user.email || '—')}</td>
-        <td><span class="badge badge--pending">${user.role === 'specialist' ? 'أخصائي' : 'مالك مساحة'}</span></td>
-        <td>${escapeHtml(formatSubmissionDate(user.submittedAt))}</td>
-        <td class="actions">
-          <button class="button button--small" type="button" data-action="approve" data-user-id="${escapeHtml(user.id)}">قبول</button>
-          <button class="button button--small button--secondary" type="button" data-action="reject" data-user-id="${escapeHtml(user.id)}">رفض</button>
-        </td>
-      </tr>
-    `).join('');
+    setStatistic(
+      statisticElements.pendingFacilitators,
+      stats.pending_facilitators
+    );
 
-    pendingContent.innerHTML = `
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th scope="col">الاسم</th><th scope="col">البريد الإلكتروني</th><th scope="col">الدور</th><th scope="col">تاريخ التقديم</th><th scope="col">الإجراءات</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`;
-  }
+    setStatistic(statisticElements.openReports, stats.open_reports);
 
-  function renderFacilitatorApplications() {
-    const applications = readArray('facilitatorApplications');
-    const pendingApplications = applications
-      .map((application, index) => ({ application, index }))
-      .filter(({ application }) => application.status === 'Pending');
+    setStatistic(statisticElements.totalGroups, stats.total_groups);
 
-    if (pendingApplications.length === 0) {
-      facilitatorApplicationsContent.innerHTML = '<p class="status-note" style="padding: 2rem 1rem; text-align: center;">لا توجد طلبات ميسرين معلقة حالياً.</p>';
-      return;
-    }
+    setStatistic(statisticElements.totalEvents, stats.total_events);
 
-    const users = readArray('users');
-    const rows = pendingApplications.map(({ application, index }) => {
-      const applicant = users.find((user) => String(user.id) === String(application.userId));
-      return `
-        <tr>
-          <td>${escapeHtml(application.applicantName || applicant?.name || '—')}</td>
-          <td>${escapeHtml(applicant?.email || application.email || '—')}</td>
-          <td>${escapeHtml(formatSubmissionDate(application.submittedAt))}</td>
-          <td class="actions">
-            <button class="button button--small" type="button" data-action="approve-facilitator" data-application-index="${index}">قبول</button>
-            <button class="button button--small button--secondary" type="button" data-action="reject-facilitator" data-application-index="${index}">رفض</button>
-          </td>
-        </tr>`;
-    }).join('');
+    // Update charts
+    renderUsersChart(charts.users_by_role || []);
+    renderEventsChart(charts.events_by_status || []);
 
-    facilitatorApplicationsContent.innerHTML = `
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th scope="col">اسم المتقدم</th><th scope="col">البريد الإلكتروني</th><th scope="col">تاريخ التقديم</th><th scope="col">الإجراءات</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`;
-  }
+  } catch (error) {
+    console.error('Failed to load dashboard statistics:', error);
 
-  function getOrganizer(event) {
-    const directName = event.organizerName || event.organizer || event.ownerName || event.providerName;
-    if (directName && typeof directName === 'object') {
-      return directName.name || directName.email || 'غير محدد';
-    }
-    if (directName) return directName;
-
-    const organizerId = event.organizerId || event.ownerId || event.providerId || event.userId;
-    const organizer = readArray('users').find((user) => String(user.id) === String(organizerId));
-    return organizer?.name || 'غير محدد';
-  }
-
-  function renderEvents() {
-    const events = readArray('events');
-    if (events.length === 0) {
-      eventsContent.innerHTML = '<p class="status-note" style="padding: 2rem 1rem; text-align: center;">لا توجد فعاليات حالياً.</p>';
-      return;
-    }
-
-    const rows = events.map((event, index) => `
-      <tr>
-        <td>${escapeHtml(event.title || event.name || '—')}</td>
-        <td>${escapeHtml(getOrganizer(event))}</td>
-        <td>${escapeHtml(formatDate(event.date || event.startDate))}</td>
-        <td><span class="badge ${event.status === 'Published' || event.status === 'منشورة' ? '' : 'badge--pending'}">${escapeHtml(event.status || 'غير محددة')}</span></td>
-        <td class="actions"><button class="button button--small button--secondary" type="button" data-action="delete-event" data-event-index="${index}">حذف</button></td>
-      </tr>
-    `).join('');
-
-    eventsContent.innerHTML = `
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th scope="col">عنوان الفعالية</th><th scope="col">المنظم</th><th scope="col">التاريخ</th><th scope="col">الحالة</th><th scope="col">الإجراءات</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`;
-  }
-
-  function displayRole(role) {
-    const labels = { member: 'عضو', facilitator: 'ميسّر', specialist: 'أخصائي', owner: 'مالك مساحة', admin: 'مدير' };
-    return labels[role] || role || 'غير محدد';
-  }
-
-  function displayStatus(status) {
-    const labels = { Active: 'نشط', Pending: 'قيد المراجعة', Rejected: 'مرفوض', Blocked: 'محظور' };
-    return labels[status] || status || 'غير محدد';
-  }
-
-  function renderAllUsers() {
-    const users = readArray('users');
-    if (!users.length) {
-      allUsersContent.innerHTML = '<p class="status-note" style="padding: 2rem 1rem; text-align: center;">لا يوجد مستخدمون حالياً.</p>';
-      return;
-    }
-
-    const rows = users.map((user, index) => `
-      <tr>
-        <td>${escapeHtml(user.name || '—')}</td>
-        <td>${escapeHtml(user.email || '—')}</td>
-        <td>${escapeHtml(displayRole(user.role))}</td>
-        <td><span class="badge ${user.status === 'Blocked' ? 'badge--declined' : user.status === 'Pending' ? 'badge--pending' : ''}">${escapeHtml(displayStatus(user.status))}</span></td>
-        <td class="actions"><button class="button button--small button--secondary" type="button" data-action="block-user" data-user-index="${index}" ${user.status === 'Blocked' ? 'disabled' : ''}>${user.status === 'Blocked' ? 'محظور' : 'حظر'}</button></td>
-      </tr>
-    `).join('');
-
-    allUsersContent.innerHTML = `
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th scope="col">الاسم</th><th scope="col">البريد الإلكتروني</th><th scope="col">الدور</th><th scope="col">الحالة</th><th scope="col">الإجراءات</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`;
-  }
-
-  function renderReports() {
-    const reports = readArray('reports');
-    if (!reports.length) {
-      reportsContent.innerHTML = '<p class="status-note" style="padding: 2rem 1rem; text-align: center;">لا توجد بلاغات حالياً</p>';
-      return;
-    }
-
-    const users = readArray('users');
-    const rows = reports.map((report, index) => {
-      const reporterId = report.reporterId || report.userId;
-      const reporter = report.reporterName || report.reporter || report.userName || users.find((user) => String(user.id) === String(reporterId))?.name || 'غير محدد';
-      const reporterName = typeof reporter === 'object' ? reporter.name || reporter.email || 'غير محدد' : reporter;
-      return `
-        <tr>
-          <td>${escapeHtml(reporterName)}</td>
-          <td>${escapeHtml(report.type || report.reportType || 'غير محدد')}</td>
-          <td>${escapeHtml(report.details || report.description || '—')}</td>
-          <td><span class="badge ${report.status === 'Resolved' ? '' : 'badge--pending'}">${escapeHtml(report.status === 'Resolved' ? 'تم الحل' : report.status || 'قيد المراجعة')}</span></td>
-          <td class="actions">
-            <button class="button button--small" type="button" data-action="resolve-report" data-report-index="${index}" ${report.status === 'Resolved' ? 'disabled' : ''}>تم الحل</button>
-            <button class="button button--small button--secondary" type="button" data-action="delete-report" data-report-index="${index}">حذف</button>
-          </td>
-        </tr>`;
-    }).join('');
-
-    reportsContent.innerHTML = `
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th scope="col">المُبلغ</th><th scope="col">نوع البلاغ</th><th scope="col">التفاصيل</th><th scope="col">الحالة</th><th scope="col">الإجراءات</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`;
-  }
-
-  function showSection(sectionName) {
-    sections.forEach((section) => {
-      section.hidden = section.id !== `section-${sectionName}`;
+    Object.values(statisticElements).forEach((element) => {
+      setStatistic(element, '—');
     });
-    navLinks.forEach((link) => {
-      const isActive = link.dataset.sectionLink === sectionName;
-      link.classList.toggle('dash-link--active', isActive);
-      if (isActive) link.setAttribute('aria-current', 'page');
-      else link.removeAttribute('aria-current');
-    });
-
-    if (sectionName === 'overview') renderOverview();
-    if (sectionName === 'users') renderPendingUsers();
-    if (sectionName === 'facilitators') renderFacilitatorApplications();
-    if (sectionName === 'all-users') renderAllUsers();
-    if (sectionName === 'events') renderEvents();
-    if (sectionName === 'reports') renderReports();
   }
+}
+
+// All platform users
+function renderAllUsers() {
+  showMessage(
+    allUsersContent,
+    'سيتم عرض جميع مستخدمي منصة ونس هنا بعد ربط القسم بالـ API.'
+  );
+}
+
+// Platform groups
+function renderGroups() {
+  showMessage(
+    groupsContent,
+    'سيتم عرض مجموعات منصة ونس هنا بعد ربط القسم بالـ API.'
+  );
+}
+
+// Platform events
+function renderEvents() {
+  showMessage(
+    eventsContent,
+    'سيتم عرض الفعاليات هنا بعد ربط القسم بالـ API.'
+  );
+}
+
+// User reports
+function renderReports() {
+  showMessage(
+    reportsContent,
+    'سيتم عرض البلاغات والشكاوى هنا بعد ربط القسم بالـ API.'
+  );
+}
+
+// Switch between dashboard sections
+function showSection(sectionName) {
+  window.location.hash = sectionName;
+
+  sections.forEach((section) => {
+    section.hidden = section.id !== `section-${sectionName}`;
+  });
 
   navLinks.forEach((link) => {
-    link.addEventListener('click', (event) => {
-      event.preventDefault();
-      showSection(link.dataset.sectionLink);
-    });
+    const isActive = link.dataset.sectionLink === sectionName;
+
+    link.classList.toggle('dash-link--active', isActive);
+
+    if (isActive) {
+      link.setAttribute('aria-current', 'page');
+    } else {
+      link.removeAttribute('aria-current');
+    }
   });
 
-  pendingContent.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-action][data-user-id]');
-    if (!button) return;
+  switch (sectionName) {
+    case 'overview':
+      loadDashboardStats();
+      break;
 
-    const users = readArray('users');
-    const index = users.findIndex((user) => String(user.id) === button.dataset.userId);
-    if (index === -1) {
+    case 'users':
       renderPendingUsers();
-      return;
-    }
+      break;
 
-    users[index] = { ...users[index], status: button.dataset.action === 'approve' ? 'Active' : 'Rejected' };
-    localStorage.setItem('users', JSON.stringify(users));
-    renderPendingUsers();
-  });
+    case 'facilitators':
+      loadFacilitatorApplications();
+      break;
 
-  facilitatorApplicationsContent.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-action][data-application-index]');
-    if (!button) return;
-
-    const applications = readArray('facilitatorApplications');
-    const applicationIndex = Number(button.dataset.applicationIndex);
-    const application = applications[applicationIndex];
-    if (!application || application.status !== 'Pending') {
-      renderFacilitatorApplications();
-      return;
-    }
-
-    const users = readArray('users');
-    if (button.dataset.action === 'approve-facilitator') {
-      applications[applicationIndex] = { ...application, status: 'Approved' };
-      const userIndex = users.findIndex((user) => String(user.id) === String(application.userId));
-      if (userIndex !== -1 && users[userIndex].role === 'member') {
-        users[userIndex] = { ...users[userIndex], role: 'facilitator' };
-      }
-      localStorage.setItem('users', JSON.stringify(users));
-      // Refresh this tab's session only when it belongs to the approved user.
-      // In normal admin use this remains the administrator's own session.
-      const sessionUser = (() => {
-        try {
-          return JSON.parse(sessionStorage.getItem('currentUser') || 'null');
-        } catch {
-          return null;
-        }
-      })();
-      if (userIndex !== -1 && String(sessionUser?.id) === String(users[userIndex].id)) {
-        sessionStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
-      }
+    case 'all-users':
       renderAllUsers();
-    } else if (button.dataset.action === 'reject-facilitator') {
-      applications[applicationIndex] = { ...application, status: 'Rejected' };
-    } else {
-      return;
-    }
+      break;
 
-    localStorage.setItem('facilitatorApplications', JSON.stringify(applications));
-    renderFacilitatorApplications();
-  });
+    case 'groups':
+      renderGroups();
+      break;
 
-  allUsersContent.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-action="block-user"]');
-    if (!button) return;
-    const users = readArray('users');
-    const userIndex = Number(button.dataset.userIndex);
-    if (!users[userIndex]) return;
-    users[userIndex] = { ...users[userIndex], status: 'Blocked' };
-    localStorage.setItem('users', JSON.stringify(users));
-    renderAllUsers();
-    renderOverview();
-  });
+    case 'events':
+      renderEvents();
+      break;
 
-  reportsContent.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-action][data-report-index]');
-    if (!button) return;
-    const reports = readArray('reports');
-    const reportIndex = Number(button.dataset.reportIndex);
-    if (!reports[reportIndex]) return;
-
-    if (button.dataset.action === 'resolve-report') {
-      reports[reportIndex] = { ...reports[reportIndex], status: 'Resolved' };
-    } else if (button.dataset.action === 'delete-report') {
-      if (!window.confirm('هل تريد حذف هذا البلاغ؟')) return;
-      reports.splice(reportIndex, 1);
-    } else {
-      return;
-    }
-
-    localStorage.setItem('reports', JSON.stringify(reports));
-    renderReports();
-  });
-
-  eventsContent.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-action="delete-event"]');
-    if (!button) return;
-    if (!window.confirm('هل أنت متأكد من حذف هذه الفعالية؟')) return;
-
-    const events = readArray('events');
-    events.splice(Number(button.dataset.eventIndex), 1);
-    localStorage.setItem('events', JSON.stringify(events));
-    renderEvents();
-    renderOverview();
-  });
-
-
-
-  //logout
-  logoutButton.addEventListener('click', async () => {
-    const token = sessionStorage.getItem('adminToken');
-
-    try {
-      await axios.post('/api/admin/logout', {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-
-    } catch (error) {
-      console.error('Logout failed:', error);
-
-    } finally {
-      sessionStorage.removeItem('adminToken');
-      sessionStorage.removeItem('currentUser');
-
-      window.location.assign('admin-login.html');
-    }
-  });
-
-  // The overview is the default section whenever the dashboard is opened.
-  renderOverview();
-  showSection('overview');
+    case 'reports':
+      renderReports();
+      break;
+  }
 }
+
+// Navigation events
+navLinks.forEach((link) => {
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    showSection(link.dataset.sectionLink);
+  });
+});
+
+// Logout administrator
+logoutButton.addEventListener('click', async () => {
+  logoutButton.disabled = true;
+
+  try {
+    await api.post('/logout');
+
+  } catch (error) {
+    console.error('Logout request failed:', error);
+
+  } finally {
+    sessionStorage.removeItem('adminToken');
+    sessionStorage.removeItem('currentUser');
+
+    window.location.replace('admin-login.html');
+  }
+});
+
+// Initialize dashboard
+async function initializeDashboard() {
+  if (!sessionStorage.getItem('adminToken')) {
+    window.location.replace('admin-login.html');
+    return;
+  }
+
+  try {
+    await loadAdminInfo();
+
+    const allowedSections = [
+      'overview',
+      'users',
+      'facilitators',
+      'reports',
+      'all-users',
+      'groups',
+      'events',
+    ];
+
+    const sectionFromUrl = window.location.hash.slice(1);
+
+    const savedSection = allowedSections.includes(sectionFromUrl)
+      ? sectionFromUrl
+      : 'overview';
+
+    showSection(savedSection);
+
+  } catch (error) {
+    console.error('Admin authentication failed:', error);
+
+    sessionStorage.removeItem('adminToken');
+    sessionStorage.removeItem('currentUser');
+
+    window.location.replace('admin-login.html');
+  }
+}
+
+// Start dashboard
+initializeDashboard();

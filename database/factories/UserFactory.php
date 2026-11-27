@@ -6,41 +6,45 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    protected static ?string $password = null;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake()->randomElement(['آدم حمدان', 'جنى عيسى', 'كريم شرف', 'تالا يوسف', 'رامي ناصر', 'لمى سعيد', 'يزن فهد', 'هبة مراد']),
             'email' => fake()->unique()->safeEmail(),
+            'phoneNumber' => fake()->optional()->numerify('+9627########'),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'remember_token' => Str::random(60),
             'role' => 'member',
-
+            'status' => 'Active',
+            'bio' => fake()->optional()->randomElement([
+                'أبحث عن مساحة دعم آمنة لتبادل الخبرات مع أشخاص يمرون بتجربة مشابهة.',
+                'أؤمن بأهمية الدعم بين الأقران إلى جانب الرعاية المهنية المتخصصة.',
+            ]),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    public function specialistRole(string $userStatus = 'Active'): static
     {
-        return $this->state(fn(array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(fn () => ['role' => 'specialist', 'status' => $userStatus]);
+    }
+
+    public function facilitatorRole(string $userStatus = 'Active'): static
+    {
+        return $this->state(fn () => ['role' => 'facilitator', 'status' => $userStatus]);
+    }
+
+    public function member(): static
+    {
+        return $this->state(fn () => ['role' => 'member']);
+    }
+
+    public function withUserStatus(string $status): static
+    {
+        return $this->state(fn () => ['status' => $status]);
     }
 }

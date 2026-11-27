@@ -1,9 +1,13 @@
 <?php
 namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 class Event extends Model
 {
+    use HasFactory;
     use SoftDeletes;
     protected $table = 'events';
     protected $guarded = ['id'];
@@ -11,15 +15,28 @@ class Event extends Model
     {
         return ['startsAt' => 'datetime', 'endsAt' => 'datetime'];
     }
-    public function group()
+
+
+    /**
+     * @return BelongsTo<Group, $this>
+     */
+    public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class, 'groupId');
     }
-    public function host()
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function host(): BelongsTo
     {
         return $this->belongsTo(User::class, 'hostId');
     }
-    public function attendees()
+
+    /**
+     * @return HasMany<EventAttendee, $this>
+     */
+    public function attendees(): HasMany
     {
         return $this->hasMany(EventAttendee::class, 'eventId');
     }
