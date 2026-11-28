@@ -2,6 +2,8 @@
 import { api } from './admin/api.js';
 import { loadFacilitatorApplications } from './admin/facilitators.js';
 import { renderPendingUsers } from './admin/specialists.js';
+import { loadReports } from './admin/reports.js';
+import { loadAllUsers } from './admin/all-users.js';
 
 // HTML elements
 const adminName = document.querySelector('#admin-name');
@@ -11,9 +13,7 @@ const facilitatorApplicationsContent = document.querySelector(
   '#facilitator-applications-content'
 );
 const eventsContent = document.querySelector('#events-content');
-const allUsersContent = document.querySelector('#all-users-content');
 const groupsContent = document.querySelector('#groups-content');
-const reportsContent = document.querySelector('#reports-content');
 
 const navLinks = document.querySelectorAll('[data-section-link]');
 const sections = document.querySelectorAll('.admin-section');
@@ -244,13 +244,7 @@ async function loadDashboardStats() {
   }
 }
 
-// All platform users
-function renderAllUsers() {
-  showMessage(
-    allUsersContent,
-    'سيتم عرض جميع مستخدمي منصة ونس هنا بعد ربط القسم بالـ API.'
-  );
-}
+
 
 // Platform groups
 function renderGroups() {
@@ -268,13 +262,7 @@ function renderEvents() {
   );
 }
 
-// User reports
-function renderReports() {
-  showMessage(
-    reportsContent,
-    'سيتم عرض البلاغات والشكاوى هنا بعد ربط القسم بالـ API.'
-  );
-}
+
 
 // Switch between dashboard sections
 function showSection(sectionName) {
@@ -310,7 +298,7 @@ function showSection(sectionName) {
       break;
 
     case 'all-users':
-      renderAllUsers();
+      loadAllUsers(1);
       break;
 
     case 'groups':
@@ -322,7 +310,7 @@ function showSection(sectionName) {
       break;
 
     case 'reports':
-      renderReports();
+      loadReports(1);
       break;
   }
 }
