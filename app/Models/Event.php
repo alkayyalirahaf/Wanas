@@ -22,7 +22,7 @@ class Event extends Model
      */
     public function group(): BelongsTo
     {
-        return $this->belongsTo(Group::class, 'groupId');
+        return $this->belongsTo(Group::class, 'groupId')->withTrashed();
     }
 
     /**
@@ -30,7 +30,7 @@ class Event extends Model
      */
     public function host(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'hostId');
+        return $this->belongsTo(User::class, 'hostId')->withTrashed();
     }
 
     /**
@@ -43,5 +43,11 @@ class Event extends Model
     public function participants()
     {
         return $this->belongsToMany(User::class, 'event_attendees', 'eventId', 'userId')->withPivot(['id', 'joinedAt']);
+    }
+
+    // Admin who deleted this event.
+    public function deletedByAdmin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deletedBy')->withTrashed();
     }
 }

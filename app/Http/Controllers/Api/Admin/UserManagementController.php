@@ -21,8 +21,7 @@ class UserManagementController extends Controller
             'per_page' => ['nullable', 'integer', Rule::in([10, 25, 50])],
         ]);
 
-        $query = User::query()
-            ->where('role', '!=', 'admin');
+        $query = User::query()->with('blockedByAdmin:id,name')->where('role', '!=', 'admin');
 
         // Include soft-deleted users only when requested.
         if (!empty($validated['deleted'])) {
@@ -61,7 +60,9 @@ class UserManagementController extends Controller
     // Get one user's details.
     public function show(int $user): JsonResponse
     {
-        $user = User::where('role', '!=', 'admin')->findOrFail($user);
+        $user = User::with('blockedByAdmin:id,name')
+            ->where('role', '!=', 'admin')
+            ->findOrFail($user);
 
         return response()->json([
             'status' => 'success',
@@ -69,9 +70,13 @@ class UserManagementController extends Controller
         ]);
     }
 
-    // Block an active user.
-    public function block(int $user): JsonResponse
+    // Block an active user and save the blocking details.
+    public function block(Request $request, int $user): JsonResponse
     {
+        $validated = $request->validate([
+            'blockReason' => ['required', 'string', 'min:5', 'max:1000'],
+        ]);
+
         $user = User::where('role', '!=', 'admin')->findOrFail($user);
 
         if ($user->status !== 'Active') {
@@ -81,9 +86,11 @@ class UserManagementController extends Controller
             ], 422);
         }
 
-        $user->update([
-            'status' => 'Blocked',
-        ]);
+        $user->status = 'Blocked';
+        $user->blockReason = $validated['blockReason'];
+        $user->blockedBy = auth()->id();
+        $user->blockedAt = now();
+        $user->save();
 
         return response()->json([
             'status' => 'success',
@@ -92,7 +99,7 @@ class UserManagementController extends Controller
         ]);
     }
 
-    // Unblock a blocked user.
+    // Unblock a blocked user and clear the current blocking details.
     public function unblock(int $user): JsonResponse
     {
         $user = User::where('role', '!=', 'admin')->findOrFail($user);
@@ -104,9 +111,11 @@ class UserManagementController extends Controller
             ], 422);
         }
 
-        $user->update([
-            'status' => 'Active',
-        ]);
+        $user->status = 'Active';
+        $user->blockReason = null;
+        $user->blockedBy = null;
+        $user->blockedAt = null;
+        $user->save();
 
         return response()->json([
             'status' => 'success',

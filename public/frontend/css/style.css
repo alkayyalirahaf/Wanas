@@ -1619,3 +1619,53 @@ body {
         justify-content: space-between;
     }
 }
+
+
+/* Admin confirmation modal */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.admin-modal {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.admin-modal h2 {
+  margin-top: 0;
+}
+
+.admin-modal p {
+  line-height: 1.8;
+}
+
+.admin-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.event-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.event-actions .button {
+  margin: 0;
+}

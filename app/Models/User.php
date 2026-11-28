@@ -16,13 +16,31 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $table = 'users';
 
 
-    protected $fillable = ['name', 'email', 'phoneNumber', 'password', 'role', 'status', 'profileImageUrl', 'bio'];
-    protected $hidden = ['password', 'remember_token',
-];
+    protected $fillable = [
+        'name',
+        'email',
+        'phoneNumber',
+        'password',
+        'role',
+        'status',
+        'profileImageUrl',
+        'bio',
+        'blockReason',
+        'blockedBy',
+        'blockedAt',
+    ];
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     protected function casts(): array
     {
-        return ['password' => 'hashed' , 'email_verified_at' => 'datetime',];
+        return [
+            'password' => 'hashed',
+            'email_verified_at' => 'datetime',
+            'blockedAt' => 'datetime',
+        ];
     }
 
 
@@ -73,5 +91,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function aiSessions()
     {
         return $this->hasMany(AiSession::class, 'userId');
+    }
+
+
+    // Admin who blocked this user.
+    public function blockedByAdmin()
+    {
+        return $this->belongsTo(User::class, 'blockedBy')->withTrashed();
     }
 }

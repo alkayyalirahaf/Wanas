@@ -8,6 +8,9 @@ use App\Http\Controllers\Api\Admin\SpecialistVerificationController;
 use App\Http\Controllers\Api\Admin\FacilitatorApplicationController;
 use App\Http\Controllers\Api\Admin\ReportController;
 use App\Http\Controllers\Api\Admin\UserManagementController;
+use App\Http\Controllers\Api\Admin\GroupManagementController;
+use App\Http\Controllers\Api\Admin\EventManagementController;
+use App\Http\Controllers\Api\Admin\PaymentManagementController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -55,5 +58,26 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy']);
     Route::patch('/admin/users/{user}/restore', [UserManagementController::class, 'restore']);
 
+    // Group Management
+    Route::get('/admin/groups', [GroupManagementController::class, 'index']);
+    Route::get('/admin/groups/{group}', [GroupManagementController::class, 'show']);
+
+    Route::patch('/admin/groups/{group}/archive', [GroupManagementController::class, 'archive']);
+    Route::patch('/admin/groups/{group}/activate', [GroupManagementController::class, 'activate']);
+
+    Route::delete('/admin/groups/{group}', [GroupManagementController::class, 'destroy']);
+    Route::patch('/admin/groups/{group}/restore', [GroupManagementController::class, 'restore']);
+
+
+    // Event Management
+    Route::get('/admin/events', [EventManagementController::class, 'index']);
+    Route::get('/admin/events/{event}', [EventManagementController::class, 'show']);
+
+    Route::delete('/admin/events/{event}', [EventManagementController::class, 'destroy']);
+    Route::patch('/admin/events/{event}/restore', [EventManagementController::class, 'restore']);
+
+    // Payment Management
+    Route::get('/admin/payments', [PaymentManagementController::class, 'index']);
+    Route::get('/admin/payments/{payment}', [PaymentManagementController::class, 'show']);
 });
 

@@ -16,7 +16,7 @@ let searchTimeout = null;
 // Current users and selected user
 let currentUsers = [];
 let selectedUserId = null;
-let confirmDeleteUserId = null;
+let pendingUserAction = null;
 
 // Escape HTML to safely display database values.
 function escapeHTML(value) {
@@ -186,8 +186,6 @@ function renderUsers(pagination) {
             </table>
         </div>
 
-        <div id="user-details"></div>
-
         <div class="pagination">
             <div class="pagination-info">
                 عرض ${pagination.from ?? 0} إلى ${pagination.to ?? 0}
@@ -223,36 +221,29 @@ function renderUsers(pagination) {
     }
 }
 
-// Display selected user details.
+
+// Display selected user details in a modal.
 function renderUserDetails() {
     const user = currentUsers.find(
         (item) => item.id === Number(selectedUserId)
     );
 
-    const detailsContainer = document.querySelector('#user-details');
-
-    if (!user || !detailsContainer) return;
+    if (!user) return;
 
     let actionButtons = '';
 
     if (showDeleted) {
         actionButtons = `
-            <button
-                class="button"
-                type="button"
-                data-action="restore"
-                data-id="${user.id}">
+            <button class="button" type="button"
+                data-action="restore" data-id="${user.id}">
                 استعادة المستخدم
             </button>
         `;
     } else {
         if (user.status === 'Active') {
             actionButtons += `
-                <button
-                    class="button button--secondary"
-                    type="button"
-                    data-action="block"
-                    data-id="${user.id}">
+                <button class="button button--secondary" type="button"
+                    data-action="block" data-id="${user.id}">
                     حظر المستخدم
                 </button>
             `;
@@ -260,53 +251,59 @@ function renderUserDetails() {
 
         if (user.status === 'Blocked') {
             actionButtons += `
-                <button
-                    class="button"
-                    type="button"
-                    data-action="unblock"
-                    data-id="${user.id}">
+                <button class="button" type="button"
+                    data-action="unblock" data-id="${user.id}">
                     فك الحظر
                 </button>
             `;
         }
 
         actionButtons += `
-            <button
-                class="button button--secondary"
-                type="button"
-                data-action="delete"
-                data-id="${user.id}">
+            <button class="button button--secondary" type="button"
+                data-action="delete" data-id="${user.id}">
                 حذف المستخدم
             </button>
         `;
     }
 
-    const deleteConfirmation = confirmDeleteUserId === user.id
-        ? `
-            <div class="status-note" style="margin-top: 1rem; padding: 1rem;">
-                <p>هل أنت متأكد من حذف هذا المستخدم؟</p>
+    // Display block information only for blocked users.
+    const blockDetails = user.status === 'Blocked' ? `
+        <div class="user-block-details" style="margin-top: 1.5rem; padding: 1rem; background: #f8f3f3; border-radius: 8px;">
+            <h3>تفاصيل الحظر</h3>
 
-                <button
-                    class="button"
-                    type="button"
-                    data-action="confirm-delete"
-                    data-id="${user.id}">
-                    نعم، احذف المستخدم
-                </button>
+            <p>
+                <strong>سبب الحظر:</strong>
+                ${escapeHTML(user.blockReason || 'غير متوفر')}
+            </p>
 
-                <button
-                    class="button button--secondary"
-                    type="button"
-                    data-action="cancel-delete">
-                    إلغاء
-                </button>
-            </div>
-        `
-        : '';
+            <p>
+                <strong>تاريخ الحظر:</strong>
+                ${user.blockedAt
+            ? escapeHTML(new Date(user.blockedAt).toLocaleString('ar-JO'))
+            : 'غير متوفر'}
+            </p>
 
-    detailsContainer.innerHTML = `
-        <div class="panel" style="margin-top: 1.5rem; padding: 1.5rem;">
-            <h3>تفاصيل المستخدم</h3>
+            <p>
+                <strong>بواسطة:</strong>
+                ${escapeHTML(user.blocked_by_admin?.name || 'غير متوفر')}
+            </p>
+        </div>
+    ` : '';
+
+    document.getElementById('user-details-modal')?.remove();
+
+    const modal = document.createElement('div');
+
+    modal.id = 'user-details-modal';
+    modal.className = 'admin-modal-overlay';
+
+    modal.innerHTML = `
+        <div class="admin-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-details-title">
+
+            <h2 id="user-details-title">تفاصيل المستخدم</h2>
 
             <p><strong>الاسم:</strong> ${escapeHTML(user.name)}</p>
             <p><strong>البريد الإلكتروني:</strong> ${escapeHTML(user.email)}</p>
@@ -315,20 +312,238 @@ function renderUserDetails() {
             <p><strong>الحالة:</strong> ${escapeHTML(getStatusLabel(user.status, showDeleted))}</p>
             <p><strong>نبذة:</strong> ${escapeHTML(user.bio || 'لا توجد نبذة')}</p>
 
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+            ${blockDetails}
+
+            <div class="admin-modal-actions">
                 ${actionButtons}
+
+                <button class="button button--secondary"
+                    type="button" data-action="close-details">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            selectedUserId = null;
+            modal.remove();
+        }
+    });
+}
+
+
+
+
+
+// Display confirmation modal for user actions.
+function showUserConfirmation(action, userId) {
+    document.getElementById('user-confirmation-modal')?.remove();
+
+    const messages = {
+        block: {
+            title: 'تأكيد حظر المستخدم',
+            message: 'هل أنت متأكد من حظر هذا المستخدم؟',
+            button: 'تأكيد الحظر',
+        },
+        unblock: {
+            title: 'تأكيد فك الحظر',
+            message: 'هل تريد فك الحظر عن هذا المستخدم؟',
+            button: 'فك الحظر',
+        },
+        delete: {
+            title: 'تأكيد حذف المستخدم',
+            message: 'هل أنت متأكد من حذف هذا المستخدم؟',
+            button: 'حذف المستخدم',
+        },
+        restore: {
+            title: 'تأكيد استعادة المستخدم',
+            message: 'هل تريد استعادة هذا المستخدم؟',
+            button: 'استعادة المستخدم',
+        },
+    };
+
+    const config = messages[action];
+
+    if (!config) return;
+
+    pendingUserAction = { action, userId };
+
+    const modal = document.createElement('div');
+
+    modal.id = 'user-confirmation-modal';
+    modal.className = 'admin-modal-overlay';
+
+    modal.innerHTML = `
+        <div class="admin-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-confirmation-title">
+
+            <h2 id="user-confirmation-title">
+                ${config.title}
+            </h2>
+
+            <p>${config.message}</p>
+
+            ${action === 'block' ? `
+                <div style="margin-top: 1rem; text-align: right;">
+                    <label for="user-block-reason">
+                        سبب الحظر <span aria-hidden="true">*</span>
+                    </label>
+
+                    <textarea
+                        id="user-block-reason"
+                        rows="4"
+                        maxlength="1000"
+                        placeholder="اكتب سبب حظر المستخدم..."
+                        required
+                        style="width: 100%; margin-top: 0.5rem; padding: 0.75rem;">
+                    </textarea>
+
+                    <small>يجب إدخال سبب من 5 إلى 1000 حرف.</small>
+                </div>
+            ` : ''}
+
+            <div class="admin-modal-actions">
+                <button
+                    class="button button--secondary"
+                    type="button"
+                    id="confirm-user-action">
+                    ${config.button}
+                </button>
 
                 <button
                     class="button button--secondary"
                     type="button"
-                    data-action="close-details">
-                    إغلاق التفاصيل
+                    id="cancel-user-action">
+                    إغلاق
                 </button>
             </div>
 
-            ${deleteConfirmation}
+            <div id="user-modal-message" aria-live="polite"></div>
         </div>
     `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('confirm-user-action')
+        .addEventListener('click', executeUserAction);
+
+    document.getElementById('cancel-user-action')
+        .addEventListener('click', closeUserModal);
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeUserModal();
+        }
+    });
+}
+
+
+
+// Close confirmation modal.
+function closeUserModal() {
+    pendingUserAction = null;
+
+    document.getElementById('user-confirmation-modal')?.remove();
+}
+
+// Execute confirmed user action.
+async function executeUserAction() {
+    if (!pendingUserAction) return;
+
+    const { action, userId } = pendingUserAction;
+
+    const confirmButton = document.getElementById('confirm-user-action');
+    const messageContainer = document.getElementById('user-modal-message');
+
+    // Validate and send the blocking reason.
+    if (action === 'block') {
+        const reasonInput = document.getElementById('user-block-reason');
+        const blockReason = reasonInput?.value.trim() || '';
+
+        if (blockReason.length < 5 || blockReason.length > 1000) {
+            messageContainer.innerHTML = `
+                <p class="status-note">
+                    يرجى إدخال سبب حظر يتراوح بين 5 و1000 حرف.
+                </p>
+            `;
+
+            return;
+        }
+
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'جاري التنفيذ...';
+
+        try {
+            await api.patch(`/users/${userId}/block`, {
+                blockReason: blockReason,
+            });
+
+            pendingUserAction = null;
+
+            document.getElementById('user-confirmation-modal')?.remove();
+
+            await loadAllUsers(currentPage);
+
+        } catch (error) {
+            console.error('User action failed:', error);
+
+            messageContainer.innerHTML = `
+                <p class="status-note">
+                    ${escapeHTML(
+                error.response?.data?.message ||
+                'حدث خطأ أثناء تنفيذ العملية.'
+            )}
+                </p>
+            `;
+
+            confirmButton.disabled = false;
+            confirmButton.textContent = 'إعادة المحاولة';
+        }
+
+        return;
+    }
+
+    confirmButton.disabled = true;
+    confirmButton.textContent = 'جاري التنفيذ...';
+
+    try {
+        if (action === 'unblock') {
+            await api.patch(`/users/${userId}/unblock`);
+        } else if (action === 'delete') {
+            await api.delete(`/users/${userId}`);
+            selectedUserId = null;
+        } else if (action === 'restore') {
+            await api.patch(`/users/${userId}/restore`);
+            selectedUserId = null;
+        }
+
+        pendingUserAction = null;
+
+        document.getElementById('user-confirmation-modal')?.remove();
+
+        await loadAllUsers(currentPage);
+
+    } catch (error) {
+        console.error('User action failed:', error);
+
+        messageContainer.innerHTML = `
+            <p class="status-note">
+                ${escapeHTML(
+            error.response?.data?.message ||
+            'حدث خطأ أثناء تنفيذ العملية.'
+        )}
+            </p>
+        `;
+
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'إعادة المحاولة';
+    }
 }
 
 // Handle search.
@@ -341,7 +556,6 @@ allUsersContent.addEventListener('input', (event) => {
 
     searchTimeout = setTimeout(() => {
         selectedUserId = null;
-        confirmDeleteUserId = null;
         loadAllUsers(1);
     }, 400);
 });
@@ -363,85 +577,42 @@ allUsersContent.addEventListener('change', (event) => {
     }
 
     selectedUserId = null;
-    confirmDeleteUserId = null;
     loadAllUsers(1);
 });
 
 // Handle buttons and user actions.
-allUsersContent.addEventListener('click', async (event) => {
+document.addEventListener('click', (event) => {
     const button = event.target.closest('[data-action]');
 
     if (!button || button.disabled) return;
+
+    // Handle actions only inside the users section or user details modal.
+    if (!button.closest('#all-users-content, #user-details-modal')) {
+        return;
+    }
 
     const action = button.dataset.action;
     const userId = button.dataset.id;
 
     if (action === 'page') {
         selectedUserId = null;
-        confirmDeleteUserId = null;
         loadAllUsers(Number(button.dataset.page));
         return;
     }
 
     if (action === 'details') {
         selectedUserId = Number(userId);
-        confirmDeleteUserId = null;
         renderUserDetails();
         return;
     }
 
     if (action === 'close-details') {
         selectedUserId = null;
-        confirmDeleteUserId = null;
-
-        const detailsContainer = document.querySelector('#user-details');
-
-        if (detailsContainer) {
-            detailsContainer.innerHTML = '';
-        }
-
+        document.getElementById('user-details-modal')?.remove();
         return;
     }
 
-    if (action === 'delete') {
-        confirmDeleteUserId = Number(userId);
-        renderUserDetails();
-        return;
-    }
-
-    if (action === 'cancel-delete') {
-        confirmDeleteUserId = null;
-        renderUserDetails();
-        return;
-    }
-
-    if (!userId) return;
-
-    button.disabled = true;
-
-    try {
-        if (action === 'block') {
-            await api.patch(`/users/${userId}/block`);
-        } else if (action === 'unblock') {
-            await api.patch(`/users/${userId}/unblock`);
-        } else if (action === 'confirm-delete') {
-            await api.delete(`/users/${userId}`);
-            selectedUserId = null;
-            confirmDeleteUserId = null;
-        } else if (action === 'restore') {
-            await api.patch(`/users/${userId}/restore`);
-            selectedUserId = null;
-            confirmDeleteUserId = null;
-        }
-
-        await loadAllUsers(currentPage);
-
-    } catch (error) {
-        console.error('User action failed:', error);
-
-        showMessage(
-            error.response?.data?.message ||
-            'حدث خطأ أثناء تنفيذ العملية.'
-        );
+    if (['block', 'unblock', 'delete', 'restore'].includes(action)) {
+        showUserConfirmation(action, Number(userId));
     }
 });

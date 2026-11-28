@@ -15,7 +15,7 @@ class Group extends Model
     }
     public function owner()
     {
-        return $this->belongsTo(User::class, 'ownerId');
+        return $this->belongsTo(User::class, 'ownerId')->withTrashed();
     }
     public function memberships()
     {
@@ -28,5 +28,12 @@ class Group extends Model
     public function events()
     {
         return $this->hasMany(Event::class, 'groupId');
+    }
+
+
+    // Admin who deleted this group.
+    public function deletedByAdmin()
+    {
+        return $this->belongsTo(User::class, 'deletedBy')->withTrashed();
     }
 }

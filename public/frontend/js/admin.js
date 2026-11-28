@@ -1,20 +1,15 @@
-
 import { api } from './admin/api.js';
 import { loadFacilitatorApplications } from './admin/facilitators.js';
 import { renderPendingUsers } from './admin/specialists.js';
 import { loadReports } from './admin/reports.js';
 import { loadAllUsers } from './admin/all-users.js';
+import { loadGroups } from './admin/groups.js';
+import { loadEvents } from './admin/events.js';
+import { loadPayments } from './admin/payments.js';
 
-// HTML elements
+// Admin information and navigation elements
 const adminName = document.querySelector('#admin-name');
 const logoutButton = document.querySelector('#logout-button');
-
-const facilitatorApplicationsContent = document.querySelector(
-  '#facilitator-applications-content'
-);
-const eventsContent = document.querySelector('#events-content');
-const groupsContent = document.querySelector('#groups-content');
-
 const navLinks = document.querySelectorAll('[data-section-link]');
 const sections = document.querySelectorAll('.admin-section');
 
@@ -29,24 +24,12 @@ const statisticElements = {
   totalEvents: document.querySelector('#total-events'),
 };
 
-// Chart elements
+// Dashboard chart elements
 const usersChartCanvas = document.querySelector('#users-chart');
 const eventsChartCanvas = document.querySelector('#events-chart');
 
 let usersChart = null;
 let eventsChart = null;
-
-// Display a message inside an HTML container
-function showMessage(container, message) {
-  if (!container) return;
-
-  container.innerHTML = `
-    <p class="status-note"
-       style="padding: 2rem 1rem; text-align: center;">
-      ${message}
-    </p>
-  `;
-}
 
 // Update a dashboard statistic
 function setStatistic(element, value) {
@@ -64,7 +47,9 @@ async function loadAdminInfo() {
     throw new Error('Unauthorized administrator');
   }
 
-  adminName.textContent = admin.name || 'المدير';
+  if (adminName) {
+    adminName.textContent = admin.name || 'المدير';
+  }
 }
 
 // Translate user roles into Arabic
@@ -91,7 +76,7 @@ function getEventStatusLabel(status) {
   return labels[status] || status || 'غير محددة';
 }
 
-// Create or update users distribution chart
+// Render users distribution chart
 function renderUsersChart(usersData) {
   if (!usersChartCanvas || typeof Chart === 'undefined') {
     console.error('Users chart canvas or Chart.js was not found.');
@@ -102,17 +87,13 @@ function renderUsersChart(usersData) {
     usersChart.destroy();
   }
 
-  const labels = usersData.map((item) => getRoleLabel(item.role));
-  const values = usersData.map((item) => item.count);
-
   usersChart = new Chart(usersChartCanvas, {
     type: 'doughnut',
-
     data: {
-      labels,
+      labels: usersData.map((item) => getRoleLabel(item.role)),
       datasets: [{
         label: 'عدد المستخدمين',
-        data: values,
+        data: usersData.map((item) => item.count),
         backgroundColor: [
           '#6C8EBF',
           '#8CBF9F',
@@ -123,11 +104,9 @@ function renderUsersChart(usersData) {
         borderColor: '#FFFFFF',
       }],
     },
-
     options: {
       responsive: true,
       maintainAspectRatio: false,
-
       plugins: {
         legend: {
           position: 'bottom',
@@ -141,7 +120,7 @@ function renderUsersChart(usersData) {
   });
 }
 
-// Create or update events status chart
+// Render events status chart
 function renderEventsChart(eventsData) {
   if (!eventsChartCanvas || typeof Chart === 'undefined') {
     console.error('Events chart canvas or Chart.js was not found.');
@@ -152,37 +131,26 @@ function renderEventsChart(eventsData) {
     eventsChart.destroy();
   }
 
-  const labels = eventsData.map((item) =>
-    getEventStatusLabel(item.status)
-  );
-
-  const values = eventsData.map((item) => item.count);
-
   eventsChart = new Chart(eventsChartCanvas, {
     type: 'bar',
-
     data: {
-      labels,
-
+      labels: eventsData.map((item) => getEventStatusLabel(item.status)),
       datasets: [{
         label: 'عدد الفعاليات',
-        data: values,
+        data: eventsData.map((item) => item.count),
         backgroundColor: '#8CBF9F',
         borderRadius: 6,
         maxBarThickness: 55,
       }],
     },
-
     options: {
       responsive: true,
       maintainAspectRatio: false,
-
       plugins: {
         legend: {
           display: false,
         },
       },
-
       scales: {
         y: {
           beginAtZero: true,
@@ -203,38 +171,20 @@ async function loadDashboardStats() {
 
   try {
     const response = await api.get('/stats');
-
-    // The response contains stats and charts inside data
     const { stats, charts } = response.data.data;
 
     // Update statistic cards
     setStatistic(statisticElements.totalUsers, stats.total_users);
-
-    setStatistic(
-      statisticElements.activeSpecialists,
-      stats.active_specialists
-    );
-
-    setStatistic(
-      statisticElements.pendingSpecialists,
-      stats.pending_specialists
-    );
-
-    setStatistic(
-      statisticElements.pendingFacilitators,
-      stats.pending_facilitators
-    );
-
+    setStatistic(statisticElements.activeSpecialists, stats.active_specialists);
+    setStatistic(statisticElements.pendingSpecialists, stats.pending_specialists);
+    setStatistic(statisticElements.pendingFacilitators, stats.pending_facilitators);
     setStatistic(statisticElements.openReports, stats.open_reports);
-
     setStatistic(statisticElements.totalGroups, stats.total_groups);
-
     setStatistic(statisticElements.totalEvents, stats.total_events);
 
     // Update charts
     renderUsersChart(charts.users_by_role || []);
     renderEventsChart(charts.events_by_status || []);
-
   } catch (error) {
     console.error('Failed to load dashboard statistics:', error);
 
@@ -243,26 +193,6 @@ async function loadDashboardStats() {
     });
   }
 }
-
-
-
-// Platform groups
-function renderGroups() {
-  showMessage(
-    groupsContent,
-    'سيتم عرض مجموعات منصة ونس هنا بعد ربط القسم بالـ API.'
-  );
-}
-
-// Platform events
-function renderEvents() {
-  showMessage(
-    eventsContent,
-    'سيتم عرض الفعاليات هنا بعد ربط القسم بالـ API.'
-  );
-}
-
-
 
 // Switch between dashboard sections
 function showSection(sectionName) {
@@ -302,20 +232,24 @@ function showSection(sectionName) {
       break;
 
     case 'groups':
-      renderGroups();
+      loadGroups(1);
       break;
 
     case 'events':
-      renderEvents();
+      loadEvents(1);
       break;
 
     case 'reports':
       loadReports(1);
       break;
+
+    case 'payments':
+      loadPayments(1);
+      break;
   }
 }
 
-// Navigation events
+// Handle sidebar navigation
 navLinks.forEach((link) => {
   link.addEventListener('click', (event) => {
     event.preventDefault();
@@ -324,22 +258,22 @@ navLinks.forEach((link) => {
 });
 
 // Logout administrator
-logoutButton.addEventListener('click', async () => {
-  logoutButton.disabled = true;
+if (logoutButton) {
+  logoutButton.addEventListener('click', async () => {
+    logoutButton.disabled = true;
 
-  try {
-    await api.post('/logout');
+    try {
+      await api.post('/logout');
+    } catch (error) {
+      console.error('Logout request failed:', error);
+    } finally {
+      sessionStorage.removeItem('adminToken');
+      sessionStorage.removeItem('currentUser');
 
-  } catch (error) {
-    console.error('Logout request failed:', error);
-
-  } finally {
-    sessionStorage.removeItem('adminToken');
-    sessionStorage.removeItem('currentUser');
-
-    window.location.replace('admin-login.html');
-  }
-});
+      window.location.replace('admin-login.html');
+    }
+  });
+}
 
 // Initialize dashboard
 async function initializeDashboard() {
@@ -359,16 +293,15 @@ async function initializeDashboard() {
       'all-users',
       'groups',
       'events',
+      'payments',
     ];
 
     const sectionFromUrl = window.location.hash.slice(1);
-
-    const savedSection = allowedSections.includes(sectionFromUrl)
+    const initialSection = allowedSections.includes(sectionFromUrl)
       ? sectionFromUrl
       : 'overview';
 
-    showSection(savedSection);
-
+    showSection(initialSection);
   } catch (error) {
     console.error('Admin authentication failed:', error);
 
